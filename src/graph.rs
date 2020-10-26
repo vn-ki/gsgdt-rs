@@ -161,6 +161,7 @@ mod tests {
             vec![Edge::new(label1, label2, "return".into())],
         )
     }
+
     #[test]
     fn test_adj_list() {
         let g = get_test_graph();

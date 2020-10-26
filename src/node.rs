@@ -76,14 +76,13 @@ impl Node {
             }
 
             if !self.style.last_stmt_sep {
-                write!(w, r#"<tr><td balign="left">"#)?;
-                write!(w, "{}<br/>", escape_html(&self.stmts[stmts_len - 1]))?;
-                write!(w, "</td></tr>")?;
+                write!(w, r#"<tr><td align="left">"#)?;
+                write!(w, "{}", escape_html(&self.stmts[stmts_len - 1]))?;
             } else {
                 write!(w, r#"<tr><td align="left" balign="left">"#)?;
-                write!(w, "{}<br/>", escape_html(&self.stmts[stmts_len - 1]))?;
-                write!(w, "</td></tr>")?;
+                write!(w, "{}", escape_html(&self.stmts[stmts_len - 1]))?;
             }
+            write!(w, "</td></tr>")?;
         }
 
         write!(w, "</table>")
