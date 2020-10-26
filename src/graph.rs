@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 use std::io::{self, Write};
+use serde::{Deserialize, Serialize};
 
 use crate::node::*;
 
+#[derive(Serialize, Deserialize)]
 pub enum GraphKind {
     Digraph,
     Subgraph,
@@ -11,6 +13,7 @@ pub enum GraphKind {
 pub type AdjList<'a> = HashMap<&'a String, Vec<&'a String>>;
 
 /// Graph represents a directed graph as a list of nodes and list of edges.
+#[derive(Serialize, Deserialize)]
 pub struct Graph {
     /// Identifier for the graph
     pub name: String,
@@ -162,5 +165,109 @@ mod tests {
     fn test_adj_list() {
         let g = get_test_graph();
         let adj_list = g.adj_list();
+    }
+
+    #[test]
+    fn test_json_ser() {
+        let g = get_test_graph();
+        let json = serde_json::to_string(&g).unwrap();
+        let expected_json: String = "\
+        {\
+            \"name\":\"Mir_0_3\",\
+            \"kind\":\"Digraph\",\
+            \"nodes\":[\
+            {\
+                \"stmts\":[\
+                    \"hi\",\
+                    \"hell\"\
+                ],\
+                \"label\":\"bb0__0_3\",\
+                \"title\":\"0\",\
+                \"style\":{\
+                    \"title_bg\":null,\
+                    \"last_stmt_sep\":false\
+                }\
+            },\
+            {\
+                \"stmts\":[\
+                    \"_1 = const 1_i32\",\
+                    \"_2 = const 2_i32\"\
+                ],\
+                \"label\":\"bb0__1_3\",\
+                \"title\":\"1\",\
+                \"style\":{\
+                    \"title_bg\":null,\
+                    \"last_stmt_sep\":false\
+                }\
+            }\
+            ],\
+            \"edges\":[\
+            {\
+                \"from\":\"bb0__0_3\",\
+                \"to\":\"bb0__1_3\",\
+                \"label\":\"return\"\
+            }\
+            ]\
+        }".into();
+        assert_eq!(json, expected_json)
+    }
+
+    #[test]
+    fn test_json_deser() {
+        let expected = get_test_graph();
+        let struct_json: String = "\
+        {\
+            \"name\":\"Mir_0_3\",\
+            \"kind\":\"Digraph\",\
+            \"nodes\":[\
+            {\
+                \"stmts\":[\
+                    \"hi\",\
+                    \"hell\"\
+                ],\
+                \"label\":\"bb0__0_3\",\
+                \"title\":\"0\",\
+                \"style\":{\
+                    \"title_bg\":null,\
+                    \"last_stmt_sep\":false\
+                }\
+            },\
+            {\
+                \"stmts\":[\
+                    \"_1 = const 1_i32\",\
+                    \"_2 = const 2_i32\"\
+                ],\
+                \"label\":\"bb0__1_3\",\
+                \"title\":\"1\",\
+                \"style\":{\
+                    \"title_bg\":null,\
+                    \"last_stmt_sep\":false\
+                }\
+            }\
+            ],\
+            \"edges\":[\
+            {\
+                \"from\":\"bb0__0_3\",\
+                \"to\":\"bb0__1_3\",\
+                \"label\":\"return\"\
+            }\
+            ]\
+        }".into();
+        let got: Graph = serde_json::from_str(&struct_json).unwrap();
+
+        assert_eq!(expected.nodes.len(), got.nodes.len());
+        assert_eq!(expected.edges.len(), got.edges.len());
+
+        for (n1, n2) in expected.nodes.iter().zip(got.nodes.iter()) {
+            assert_eq!(n1.stmts, n2.stmts);
+            assert_eq!(n1.label, n2.label);
+            assert_eq!(n1.title, n2.title);
+        }
+
+        for (e1, e2) in expected.edges.iter().zip(got.edges.iter()) {
+            assert_eq!(e1.from, e2.from);
+            assert_eq!(e1.to, e2.to);
+            assert_eq!(e1.label, e2.label);
+        }
     }
 }

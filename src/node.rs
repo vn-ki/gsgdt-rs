@@ -1,8 +1,9 @@
 use crate::util::escape_html;
 use std::io::{self, Write};
+use serde::{Deserialize, Serialize};
 
 /// NodeStyle defines some style of [Node](struct.Node.html)
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct NodeStyle {
     /// Override the title color of the title
     /// To color the title of the node differently in graphviz
@@ -22,6 +23,7 @@ impl Default for NodeStyle {
 }
 
 /// A graph node
+#[derive(Serialize, Deserialize)]
 pub struct Node {
     /// A list of statements.
     pub stmts: Vec<String>,
@@ -30,10 +32,10 @@ pub struct Node {
     pub label: String,
 
     /// The title is printed on the top of BB, the index of the basic block
-    title: String,
+    pub(crate) title: String,
 
     /// Can be used to override the default styles
-    style: NodeStyle,
+    pub(crate) style: NodeStyle,
 }
 
 impl Node {
@@ -88,6 +90,7 @@ impl Node {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Edge {
     pub from: String,
     pub to: String,
