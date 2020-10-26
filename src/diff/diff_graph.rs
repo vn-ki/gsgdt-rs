@@ -12,8 +12,8 @@ impl<'a> DiffGraph<'a> {
         let adj_list = graph.adj_list();
         let rev_adj_list = graph.rev_adj_list();
         // XXX: Can i do away wth clone?
-        let start_nodes = Self::get_source_labels(adj_list.clone());
-        let end_nodes = Self::get_source_labels(rev_adj_list.clone());
+        let start_nodes = Self::get_source_labels(&adj_list);
+        let end_nodes = Self::get_source_labels(&rev_adj_list);
         DiffGraph {
             graph,
             dist_start: Self::bfs_shortest_dist(rev_adj_list, start_nodes),
@@ -47,7 +47,7 @@ impl<'a> DiffGraph<'a> {
         dist
     }
 
-    fn get_source_labels(adj_list: AdjList<'a>) -> Vec<&'a str> {
+    fn get_source_labels(adj_list: &AdjList<'a>) -> Vec<&'a str> {
         adj_list
             .iter()
             .filter(|(_, v)| v.is_empty())

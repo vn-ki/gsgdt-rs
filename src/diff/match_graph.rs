@@ -14,9 +14,11 @@ pub type Mapping<'a> = BTreeMap<&'a str, &'a str>;
 //     Partial(Matching),
 // }
 
-// Matches both graphs and returns the mapping of nodes from g1 to g2
+/// Matches both graphs and returns the mapping of nodes from g1 to g2
 pub fn match_graphs<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Mapping<'a> {
     let mapping: BTreeMap<&str, &str> = get_initial_mapping(d1, d2);
+
+    // TODO: This mapping may have duplicate mappings, remove them
 
     // let _matches: Vec<Match> = mapping
     //     .iter()
@@ -110,7 +112,7 @@ fn dist_bw_nodes(d1: &DiffGraph<'_>, d2: &DiffGraph<'_>, n1: &str, n2: &str) -> 
     )
 }
 
-// Selects the most suitable match for n from L
+/// Selects the most suitable match for n from L
 fn select<'a>(
     d1: &'a DiffGraph<'_>,
     d2: &'a DiffGraph<'_>,

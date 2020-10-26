@@ -10,22 +10,36 @@ pub enum GraphKind {
 
 pub type AdjList<'a> = HashMap<&'a String, Vec<&'a String>>;
 
+/// Graph represents a directed graph as a list of nodes and list of edges.
 pub struct Graph {
-    // Identifier for the graph
+    /// Identifier for the graph
     pub name: String,
+
+    /// GraphKind indicates whether the Graph is an individual digraph or subgraph of a
+    /// larger Graph. If it is a subgraph, then a border is printed when rendering as a
+    /// graphviz graph
     pub kind: GraphKind,
 
+    /// The Vector containing the Nodes
     pub nodes: Vec<Node>,
+
+    /// The Vector containing the Edges
     pub edges: Vec<Edge>,
 }
 
 #[derive(Clone)]
 pub struct GraphvizSettings {
+    /// The attributes of the graph in graphviz.
     pub graph_attrs: Option<String>,
+
+    /// The attributes of the nodes in graphviz.
     pub node_attrs: Option<String>,
+
+    /// The attributes of the edges in graphviz.
     pub edge_attrs: Option<String>,
+
+    /// Label of the graph
     pub graph_label: Option<String>,
-    // pub dark_mode: bool,
 }
 
 impl Default for GraphvizSettings {
@@ -48,6 +62,11 @@ impl Graph {
             edges,
         }
     }
+
+    /// Returns the adjacency list representation of the graph.
+    /// Adjacency list can be used to easily find the childern of a given node.
+    /// If the a node does not have any childern, then the list correspoding to that node
+    /// will be empty.
     pub fn adj_list(&self) -> AdjList<'_> {
         let mut m = HashMap::new();
         for node in &self.nodes {
@@ -59,6 +78,12 @@ impl Graph {
         m
     }
 
+    /// Returns the reverse adjacency list representation of the graph.
+    /// Reverse adjacency list represents the adjacency list of a directed graph where
+    /// the edges have been reversed.
+    /// Reverse adjacency list can be used to easily find the parents of a given node.
+    /// If the a node does not have any childern, then the list correspoding to that node
+    /// will be empty.
     pub fn rev_adj_list(&self) -> AdjList<'_> {
         let mut m = HashMap::new();
         for node in &self.nodes {
@@ -70,16 +95,21 @@ impl Graph {
         m
     }
 
+    /// Returns the node with the given label, if found.
     pub fn get_node_by_label(&self, label: &str) -> Option<&Node> {
         self.nodes.iter().find(|node| node.label == *label)
     }
 
+    /// Returns the dot representation of the given graph.
+    /// This can rendered using the graphviz program.
     pub fn to_dot<W: Write>(&self, w: &mut W, settings: &GraphvizSettings) -> io::Result<()> {
         match self.kind {
             GraphKind::Digraph => write!(w, "digraph {}", self.name),
             // cluster_ draws a border around the graph
             GraphKind::Subgraph => write!(w, "subgraph cluster_{}", self.name),
         }?;
+
+        writeln!(w, " {{")?;
 
         if let Some(graph_attrs) = &settings.graph_attrs {
             writeln!(w, r#"    graph [{}];"#, graph_attrs)?;
@@ -90,8 +120,9 @@ impl Graph {
         if let Some(edge_attrs) = &settings.edge_attrs {
             writeln!(w, r#"    edge [{}];"#, edge_attrs)?;
         }
-
-        writeln!(w, " {{")?;
+        if let Some(label) = &settings.graph_label {
+            writeln!(w, r#"    label=<{}>;"#, label)?;
+        }
 
         for node in self.nodes.iter() {
             write!(w, r#"    {} [shape="none", label=<"#, node.label)?;

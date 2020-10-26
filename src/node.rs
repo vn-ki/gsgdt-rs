@@ -1,13 +1,14 @@
 use std::io::{self, Write};
 use crate::util::escape_html;
 
+/// NodeStyle defines some style of [Node](struct.Node.html)
 #[derive(Clone)]
 pub struct NodeStyle {
-    // Override the title color of the title
-    // To color the title of the node differently in graphviz
+    /// Override the title color of the title
+    /// To color the title of the node differently in graphviz
     pub title_bg: Option<String>,
 
-    // Print a seperator b/w the rest of the statements and the last one
+    /// Print a seperator b/w the rest of the statements and the last one
     pub last_stmt_sep: bool,
 }
 
@@ -20,13 +21,18 @@ impl Default for NodeStyle {
     }
 }
 
+/// A graph node
 pub struct Node {
+    /// A list of statements.
     pub stmts: Vec<String>,
+
+    /// A unique identifier for the given node.
     pub label: String,
 
-    // The title is printed on the top of BB, the index of the basic block
+    /// The title is printed on the top of BB, the index of the basic block
     title: String,
-    // Can be used to override the default styles
+
+    /// Can be used to override the default styles
     style: NodeStyle,
 }
 
@@ -44,7 +50,7 @@ impl Node {
         write!(w, r#"<table border="0" cellborder="1" cellspacing="0">"#)?;
 
         let bg_attr = match &self.style.title_bg {
-            Some(color) => format!("bgcolor={}", color),
+            Some(color) => format!(r#"bgcolor="{}""#, color),
             None => "".into(),
         };
         write!(
@@ -59,24 +65,24 @@ impl Node {
 
         let stmts_len = self.stmts.len();
         if !self.stmts.is_empty() {
-            write!(w, r#"<tr><td align="left" balign="left">"#)?;
-            for statement in &self.stmts[..stmts_len-1] {
-                write!(w, "{}<br/>", escape_html(statement))?;
+            if self.stmts.len() > 1 {
+                write!(w, r#"<tr><td align="left" balign="left">"#)?;
+                for statement in &self.stmts[..stmts_len-1] {
+                    write!(w, "{}<br/>", escape_html(statement))?;
+                }
+                write!(w, "</td></tr>")?;
             }
-            write!(w, "</td></tr>")?;
-        }
 
-        if !self.style.last_stmt_sep {
-            write!(w, r#"<tr><td balign="left">"#)?;
-            write!(w, "{}<br/>", escape_html(&self.stmts[stmts_len-1]))?;
-            write!(w, "</td></tr>")?;
-        } else {
-            write!(w, r#"<tr><td align="left" balign="left">"#)?;
-            write!(w, "{}<br/>", escape_html(&self.stmts[stmts_len-1]))?;
-            write!(w, "</td></tr>")?;
+            if !self.style.last_stmt_sep {
+                write!(w, r#"<tr><td balign="left">"#)?;
+                write!(w, "{}<br/>", escape_html(&self.stmts[stmts_len-1]))?;
+                write!(w, "</td></tr>")?;
+            } else {
+                write!(w, r#"<tr><td align="left" balign="left">"#)?;
+                write!(w, "{}<br/>", escape_html(&self.stmts[stmts_len-1]))?;
+                write!(w, "</td></tr>")?;
+            }
         }
-
-        // TODO: add a seperator for the last instr (terminator)
 
         write!(w, "</table>")
     }
