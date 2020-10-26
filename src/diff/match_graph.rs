@@ -4,6 +4,9 @@ use std::collections::BTreeMap;
 
 pub type Mapping<'a> = BTreeMap<&'a str, &'a str>;
 
+// TODO: Is it better to return a list of matches or a hashmap
+// It might be better to do former because we may need to distinguise
+// b/w full and partial match
 // pub struct Matching {
 //     from: String,
 //     to: String,
@@ -29,6 +32,10 @@ pub fn match_graphs<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Mapping
     //         })
     //     })
     //     .collect();
+
+    // TODO: after duplicates are weeded out, we can match the parents (or childern)
+    // of the matched nodes using a slightly lax criteria
+    // The code below does that.
 
     // we use rev adjacency list because we are going to compare the parents
     // let rev_adj_list1 = d1.graph.rev_adj_list();

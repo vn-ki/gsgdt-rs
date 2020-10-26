@@ -1,8 +1,8 @@
 #![allow(rustc::default_hash_types)]
 mod diff;
 mod graph;
-mod node;
 mod levenshtein;
+mod node;
 mod util;
 
 pub use diff::*;
@@ -33,62 +33,65 @@ mod tests {
         let mut file = std::fs::File::create("test.dot").expect("create failed");
 
         let settings: GraphvizSettings = Default::default();
-        g.to_dot(&mut file, settings).expect("can't fail");
+        g.to_dot(&mut file, &settings).expect("can't fail");
 
         assert_eq!(2 + 2, 4);
     }
 
     #[test]
     fn test_diff() {
-        let style: NodeStyle = NodeStyle { last_stmt_sep: true, ..Default::default() };
+        let style: NodeStyle = NodeStyle {
+            last_stmt_sep: true,
+            ..Default::default()
+        };
         let settings: GraphvizSettings = Default::default();
 
         let g = Graph::new(
             "Mir_0_3".into(),
             GraphKind::Digraph,
             vec![
-            Node::new(
-                vec!["StorageLive(_1)".into(), "_1 = Vec::<i32>::new()".into()],
-                "bb0".into(),
-                "bb0".into(),
-                style.clone(),
-            ),
-            Node::new(
-                vec!["resume".into()],
-                "bb1".into(),
-                "bb1".into(),
-                style.clone(),
-            ),
-            Node::new(
-                vec![
-                "StorageLive(_2) StorageLive(_3) _3 = &mut _1".into(),
-                "_2 = Vec::<i32>::push(move _3, const 1_i32)".into(),
-                ],
-                "bb2".into(),
-                "bb2".into(),
-                style.clone(),
-            ),
-            Node::new(
-                vec![
-                "StorageDead(_3) StorageDead(_2) _0 = const ()".into(),
-                "drop(_1)".into(),
-                ],
-                "bb3".into(),
-                "bb3".into(),
-                style.clone(),
-            ),
-            Node::new(
-                vec!["drop(_1)".into()],
-                "bb4".into(),
-                "bb4".into(),
-                style.clone(),
-            ),
-            Node::new(
-                vec!["StorageDead(_1)".into(), "return".into()],
-                "bb5".into(),
-                "bb5".into(),
-                style.clone(),
-            ),
+                Node::new(
+                    vec!["StorageLive(_1)".into(), "_1 = Vec::<i32>::new()".into()],
+                    "bb0".into(),
+                    "bb0".into(),
+                    style.clone(),
+                ),
+                Node::new(
+                    vec!["resume".into()],
+                    "bb1".into(),
+                    "bb1".into(),
+                    style.clone(),
+                ),
+                Node::new(
+                    vec![
+                        "StorageLive(_2) StorageLive(_3) _3 = &mut _1".into(),
+                        "_2 = Vec::<i32>::push(move _3, const 1_i32)".into(),
+                    ],
+                    "bb2".into(),
+                    "bb2".into(),
+                    style.clone(),
+                ),
+                Node::new(
+                    vec![
+                        "StorageDead(_3) StorageDead(_2) _0 = const ()".into(),
+                        "drop(_1)".into(),
+                    ],
+                    "bb3".into(),
+                    "bb3".into(),
+                    style.clone(),
+                ),
+                Node::new(
+                    vec!["drop(_1)".into()],
+                    "bb4".into(),
+                    "bb4".into(),
+                    style.clone(),
+                ),
+                Node::new(
+                    vec!["StorageDead(_1)".into(), "return".into()],
+                    "bb5".into(),
+                    "bb5".into(),
+                    style.clone(),
+                ),
             ],
             vec![
                 Edge::new("bb0".into(), "bb2".into(), "return".into()),
@@ -97,7 +100,7 @@ mod tests {
                 Edge::new("bb3".into(), "bb5".into(), "return".into()),
                 Edge::new("bb4".into(), "bb1".into(), "return".into()),
             ],
-            );
+        );
 
         let g2 = Graph::new(
             "Mir_0_3".into(),

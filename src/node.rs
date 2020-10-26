@@ -1,5 +1,5 @@
-use std::io::{self, Write};
 use crate::util::escape_html;
+use std::io::{self, Write};
 
 /// NodeStyle defines some style of [Node](struct.Node.html)
 #[derive(Clone)]
@@ -67,7 +67,7 @@ impl Node {
         if !self.stmts.is_empty() {
             if self.stmts.len() > 1 {
                 write!(w, r#"<tr><td align="left" balign="left">"#)?;
-                for statement in &self.stmts[..stmts_len-1] {
+                for statement in &self.stmts[..stmts_len - 1] {
                     write!(w, "{}<br/>", escape_html(statement))?;
                 }
                 write!(w, "</td></tr>")?;
@@ -75,11 +75,11 @@ impl Node {
 
             if !self.style.last_stmt_sep {
                 write!(w, r#"<tr><td balign="left">"#)?;
-                write!(w, "{}<br/>", escape_html(&self.stmts[stmts_len-1]))?;
+                write!(w, "{}<br/>", escape_html(&self.stmts[stmts_len - 1]))?;
                 write!(w, "</td></tr>")?;
             } else {
                 write!(w, r#"<tr><td align="left" balign="left">"#)?;
-                write!(w, "{}<br/>", escape_html(&self.stmts[stmts_len-1]))?;
+                write!(w, "{}<br/>", escape_html(&self.stmts[stmts_len - 1]))?;
                 write!(w, "</td></tr>")?;
             }
         }
@@ -106,4 +106,3 @@ impl Edge {
         )
     }
 }
-
