@@ -33,10 +33,6 @@ pub fn match_graphs<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Mapping
     //     })
     //     .collect();
 
-    // TODO: after duplicates are weeded out, we can match the parents (or childern)
-    // of the matched nodes using a slightly lax criteria
-    // The code below does that.
-
     // we use rev adjacency list because we are going to compare the parents
     let rev_adj_list1 = d1.graph.rev_adj_list();
     let rev_adj_list2 = d2.graph.rev_adj_list();
@@ -82,32 +78,30 @@ pub fn match_graphs<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Mapping
 }
 
 fn get_initial_mapping<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Mapping<'a> {
-    let mut swapped = false;
-    let (d1, d2) = if d1.graph.nodes.len() > d2.graph.nodes.len() {
-        swapped = true;
-        (d2, d1)
-    } else {
-        (d1, d2)
-    };
     let mut mapping: BTreeMap<&str, &str> = BTreeMap::new();
+    let mut reverse_mapping: BTreeMap<&str, &str> = BTreeMap::new();
     let g2_labels: Vec<&str> = d2.graph.nodes.iter().map(|n| n.label.as_str()).collect();
 
     // TODO: this can be functional
     for node in d1.graph.nodes.iter() {
         if let Some(matched_lab) = select(d1, d2, &node.label, &g2_labels, true) {
+            if let Some(lab_in_1) = reverse_mapping.get(matched_lab) {
+                // matched_lab was already matched
+                // select the one with the lowest cost
+                // this is done so that no duplicate matching will occur
+                let dist_already = dist_bw_nodes(d1, d2, lab_in_1, matched_lab);
+                let dist_new = dist_bw_nodes(d1, d2, &node.label, matched_lab);
+                if dist_new > dist_already {
+                    continue;
+                }
+                mapping.remove(lab_in_1);
+            }
             mapping.insert(&node.label, matched_lab);
+            reverse_mapping.insert(matched_lab, &node.label);
         }
     }
 
-    if swapped {
-        let mut swapped_map = BTreeMap::new();
-        for (k, v) in mapping.into_iter() {
-            swapped_map.insert(v, k);
-        }
-        swapped_map
-    } else {
-        mapping
-    }
+    mapping
 }
 
 fn dist_bw_nodes(d1: &DiffGraph<'_>, d2: &DiffGraph<'_>, n1: &str, n2: &str) -> Option<usize> {
