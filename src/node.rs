@@ -89,10 +89,17 @@ impl Node {
     }
 }
 
+/// A directed graph edge
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Edge {
+    /// The label of the source node of the edge.
     pub from: String,
+
+    /// The label of the target node of the edge.
     pub to: String,
+
+    /// The label (title) of the edge. This doesn't have to unique.
+    // TODO: Rename this to title?
     pub label: String,
 }
 
@@ -100,6 +107,7 @@ impl Edge {
     pub fn new(from: String, to: String, label: String) -> Edge {
         Edge { from, to, label }
     }
+
     pub fn to_dot<W: Write>(&self, w: &mut W) -> io::Result<()> {
         writeln!(
             w,

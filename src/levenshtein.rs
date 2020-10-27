@@ -1,7 +1,7 @@
 use std::cmp::min;
 
-
-pub fn distance(s1: &str, s2: &str) -> usize {
+/// Calculate the levenshtein distance between two strings.
+pub(crate) fn distance(s1: &str, s2: &str) -> usize {
     let v1: Vec<char> = s1.chars().collect();
     let v2: Vec<char> = s2.chars().collect();
 
