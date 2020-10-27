@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::node::*;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum GraphKind {
     Digraph,
     Subgraph,
@@ -17,11 +17,6 @@ pub type AdjList<'a> = HashMap<&'a String, Vec<&'a String>>;
 pub struct Graph {
     /// Identifier for the graph
     pub name: String,
-
-    /// GraphKind indicates whether the Graph is an individual digraph or subgraph of a
-    /// larger Graph. If it is a subgraph, then a border is printed when rendering as a
-    /// graphviz graph
-    pub kind: GraphKind,
 
     /// The Vector containing the Nodes
     pub nodes: Vec<Node>,
@@ -57,10 +52,9 @@ impl Default for GraphvizSettings {
 }
 
 impl Graph {
-    pub fn new(name: String, kind: GraphKind, nodes: Vec<Node>, edges: Vec<Edge>) -> Graph {
+    pub fn new(name: String, nodes: Vec<Node>, edges: Vec<Edge>) -> Graph {
         Graph {
             name,
-            kind,
             nodes,
             edges,
         }
@@ -105,12 +99,12 @@ impl Graph {
 
     /// Returns the dot representation of the given graph.
     /// This can rendered using the graphviz program.
-    pub fn to_dot<W: Write>(&self, w: &mut W, settings: &GraphvizSettings) -> io::Result<()> {
-        match self.kind {
-            GraphKind::Digraph => write!(w, "digraph {}", self.name),
-            // cluster_ draws a border around the graph
-            GraphKind::Subgraph => write!(w, "subgraph cluster_{}", self.name),
-        }?;
+    pub fn to_dot<W: Write>(&self, w: &mut W, settings: &GraphvizSettings, as_subgraph: bool) -> io::Result<()> {
+        if as_subgraph {
+            write!(w, "subgraph cluster_{}", self.name)?;
+        } else {
+            write!(w, "digraph {}", self.name)?;
+        }
 
         writeln!(w, " {{")?;
 
@@ -156,7 +150,6 @@ mod tests {
 
         Graph::new(
             "Mir_0_3".into(),
-            GraphKind::Digraph,
             vec![node1, node2],
             vec![Edge::new(label1, label2, "return".into())],
         )
@@ -165,7 +158,7 @@ mod tests {
     #[test]
     fn test_adj_list() {
         let g = get_test_graph();
-        let adj_list = g.adj_list();
+        let _adj_list = g.adj_list();
     }
 
     #[test]
@@ -175,7 +168,6 @@ mod tests {
         let expected_json: String = "\
         {\
             \"name\":\"Mir_0_3\",\
-            \"kind\":\"Digraph\",\
             \"nodes\":[\
             {\
                 \"stmts\":[\
@@ -219,7 +211,6 @@ mod tests {
         let struct_json: String = "\
         {\
             \"name\":\"Mir_0_3\",\
-            \"kind\":\"Digraph\",\
             \"nodes\":[\
             {\
                 \"stmts\":[\

@@ -7,31 +7,43 @@ pub type Mapping<'a> = BTreeMap<&'a str, &'a str>;
 // TODO: Is it better to return a list of matches or a hashmap
 // It might be better to do former because we may need to distinguise
 // b/w full and partial match
-// pub struct Matching {
-//     from: String,
-//     to: String,
-// }
+#[derive(Debug, PartialEq)]
+pub struct Matching<'a> {
+    pub from: &'a str,
+    pub to: &'a str,
+}
+
+impl<'a> Matching<'a> {
+    pub fn new(from: &'a str, to: &'a str) -> Matching<'a> {
+        Matching { from, to }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Match<'a> {
+    Full(Matching<'a>),
+    Partial(Matching<'a>),
+}
 //
-// pub enum Match {
-//     Full(Matching),
-//     Partial(Matching),
+// impl<'a> Match<'a> {
+//     fn is_full(&self) -> bool {
+//         match self {
+//             Match::Full(_) => true,
+//             _ => false
+//         }
+//     }
 // }
 
 /// Matches both graphs and returns the mapping of nodes from g1 to g2
-pub fn match_graphs<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Mapping<'a> {
+pub fn match_graphs<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Vec<Match<'a>> {
     let mut mapping: BTreeMap<&str, &str> = get_initial_mapping(d1, d2);
 
     // TODO: This mapping may have duplicate mappings, remove them
 
-    // let _matches: Vec<Match> = mapping
-    //     .iter()
-    //     .map(|(from, to)| {
-    //         Match::Full(Matching {
-    //             from: from.to_string(),
-    //             to: to.to_string(),
-    //         })
-    //     })
-    //     .collect();
+    let mut matches: Vec<Match> = mapping
+        .iter()
+        .map(|(from, to)| Match::Full(Matching { from, to }))
+        .collect();
 
     // we use rev adjacency list because we are going to compare the parents
     let rev_adj_list1 = d1.graph.rev_adj_list();
@@ -68,13 +80,18 @@ pub fn match_graphs<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Mapping
         }
         // println!("{:?}", new_mapping);
         // merge
-        if !merge(&mut mapping, &new_mapping) {
+        let new_matches = get_new_matches(&mapping, &new_mapping);
+        if new_matches.len() == 0 {
             break;
+        }
+        for mch in new_matches {
+            mapping.insert(mch.from, mch.to);
+            matches.push(Match::Partial(mch));
         }
         prev_mapping = new_mapping;
     }
 
-    mapping
+    matches
 }
 
 fn get_initial_mapping<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Mapping<'a> {
@@ -135,7 +152,7 @@ fn select<'a>(
     d2: &'a DiffGraph<'_>,
     n: &'a str,
     list_of_labs: &[&'a str],
-    use_text_dist_filter: bool
+    use_text_dist_filter: bool,
 ) -> Option<&'a str> {
     let node = d1.graph.get_node_by_label(n).unwrap();
     let node_stmt_len = node.stmts.len();
@@ -147,7 +164,6 @@ fn select<'a>(
             // filter out nodes that may differ by more than 2 lines
             (other_node.stmts.len() as i64 - node.stmts.len() as i64).abs() <= 2
         })
-        // TODO: make this filter configurable
         .filter(|lab| {
             if !use_text_dist_filter {
                 return true;
@@ -161,12 +177,11 @@ fn select<'a>(
         .map(|x| *x)
 }
 
-fn merge<'a>(mapping: &mut Mapping<'a>, new_mapping: &Mapping<'a>) -> bool {
-    let mut changed = false;
+fn get_new_matches<'a>(mapping: &Mapping<'a>, new_mapping: &Mapping<'a>) -> Vec<Matching<'a>> {
+    let mut changed = Vec::new();
     for (k, v) in new_mapping.iter() {
         if !mapping.contains_key(k) {
-            mapping.insert(k, v);
-            changed = true;
+            changed.push(Matching { from: k, to: v })
         }
     }
 

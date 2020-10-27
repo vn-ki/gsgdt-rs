@@ -1,12 +1,14 @@
 #![allow(rustc::default_hash_types)]
 mod diff;
 mod graph;
+mod multi_graph;
 mod levenshtein;
 mod node;
 mod util;
 
 pub use diff::*;
 pub use graph::*;
+pub use multi_graph::*;
 pub use node::*;
 
 #[cfg(test)]
@@ -35,7 +37,6 @@ mod tests {
 
         let g = Graph::new(
             "Mir_0_3".into(),
-            GraphKind::Digraph,
             nodes,
             vec![Edge::new(label1, label2, "return".into())],
         );
@@ -43,7 +44,7 @@ mod tests {
         let mut file = std::fs::File::create("test.dot").expect("create failed");
 
         let settings: GraphvizSettings = Default::default();
-        g.to_dot(&mut file, &settings).expect("can't fail");
+        g.to_dot(&mut file, &settings, false).expect("can't fail");
 
         assert_eq!(2 + 2, 4);
     }

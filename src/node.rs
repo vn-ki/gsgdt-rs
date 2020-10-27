@@ -23,7 +23,7 @@ impl Default for NodeStyle {
 }
 
 /// A graph node
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Node {
     /// A list of statements.
     pub stmts: Vec<String>,
@@ -90,7 +90,7 @@ impl Node {
 }
 
 /// A directed graph edge
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Edge {
     /// The label of the source node of the edge.
     pub from: String,
