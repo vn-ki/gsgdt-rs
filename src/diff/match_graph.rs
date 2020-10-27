@@ -55,18 +55,13 @@ pub fn match_graphs<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Vec<Mat
     loop {
         let mut new_mapping: Mapping = BTreeMap::new();
         for (k, v) in prev_mapping.iter() {
-            let parents_in_1 = rev_adj_list1.get(&k.to_string()).unwrap();
-            let parents_in_2: Vec<_> = rev_adj_list2
-                .get(&v.to_string())
-                .unwrap()
-                .iter()
-                .map(|x| x.as_str())
-                .collect();
+            let parents_in_1 = rev_adj_list1.get(k).unwrap();
+            let parents_in_2 = rev_adj_list2.get(v).unwrap();
 
             for n in parents_in_1.iter() {
                 // don't bother selecting if the node in 1 is already matched
                 // as we use a stricter selection for the initial matching
-                if mapping.contains_key(n.as_str()) {
+                if mapping.contains_key(n) {
                     continue;
                 }
                 if let Some(lab) = select(d1, d2, n, &parents_in_2, false) {

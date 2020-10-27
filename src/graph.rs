@@ -1,6 +1,6 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::{self, Write};
-use serde::{Deserialize, Serialize};
 
 use crate::node::*;
 
@@ -10,7 +10,7 @@ pub enum GraphKind {
     Subgraph,
 }
 
-pub type AdjList<'a> = HashMap<&'a String, Vec<&'a String>>;
+pub type AdjList<'a> = HashMap<&'a str, Vec<&'a str>>;
 
 /// Graph represents a directed graph as a list of nodes and list of edges.
 #[derive(Serialize, Deserialize)]
@@ -53,11 +53,7 @@ impl Default for GraphvizSettings {
 
 impl Graph {
     pub fn new(name: String, nodes: Vec<Node>, edges: Vec<Edge>) -> Graph {
-        Graph {
-            name,
-            nodes,
-            edges,
-        }
+        Graph { name, nodes, edges }
     }
 
     /// Returns the adjacency list representation of the graph.
@@ -65,7 +61,7 @@ impl Graph {
     /// If the a node does not have any childern, then the list correspoding to that node
     /// will be empty.
     pub fn adj_list(&self) -> AdjList<'_> {
-        let mut m = HashMap::new();
+        let mut m: AdjList<'_> = HashMap::new();
         for node in &self.nodes {
             m.insert(&node.label, Vec::new());
         }
@@ -82,7 +78,7 @@ impl Graph {
     /// If the a node does not have any childern, then the list correspoding to that node
     /// will be empty.
     pub fn rev_adj_list(&self) -> AdjList<'_> {
-        let mut m = HashMap::new();
+        let mut m: AdjList<'_> = HashMap::new();
         for node in &self.nodes {
             m.insert(&node.label, Vec::new());
         }
@@ -99,7 +95,12 @@ impl Graph {
 
     /// Returns the dot representation of the given graph.
     /// This can rendered using the graphviz program.
-    pub fn to_dot<W: Write>(&self, w: &mut W, settings: &GraphvizSettings, as_subgraph: bool) -> io::Result<()> {
+    pub fn to_dot<W: Write>(
+        &self,
+        w: &mut W,
+        settings: &GraphvizSettings,
+        as_subgraph: bool,
+    ) -> io::Result<()> {
         if as_subgraph {
             write!(w, "subgraph cluster_{}", self.name)?;
         } else {
@@ -158,7 +159,12 @@ mod tests {
     #[test]
     fn test_adj_list() {
         let g = get_test_graph();
-        let _adj_list = g.adj_list();
+        let adj_list = g.adj_list();
+        let expected: AdjList = [("bb0__0_3", vec!["bb0__1_3"]), (&"bb0__1_3", vec![])]
+            .iter()
+            .cloned()
+            .collect();
+        assert_eq!(adj_list, expected);
     }
 
     #[test]
@@ -201,7 +207,8 @@ mod tests {
                 \"label\":\"return\"\
             }\
             ]\
-        }".into();
+        }"
+        .into();
         assert_eq!(json, expected_json)
     }
 
@@ -244,7 +251,8 @@ mod tests {
                 \"label\":\"return\"\
             }\
             ]\
-        }".into();
+        }"
+        .into();
         let got: Graph = serde_json::from_str(&struct_json).unwrap();
 
         assert_eq!(expected.nodes.len(), got.nodes.len());

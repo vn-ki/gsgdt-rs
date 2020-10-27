@@ -30,7 +30,7 @@ impl<'a> DiffGraph<'a> {
         let mut visited = HashSet::new();
         let mut queue: VecDeque<&str> = source.into();
         while let Some(node) = queue.pop_front() {
-            let neighbours = adj_list.get(&node.to_string()).unwrap();
+            let neighbours = adj_list.get(node).unwrap();
             let curr_dist = *dist.get(&node).unwrap();
 
             for neighbour in neighbours {
@@ -51,7 +51,7 @@ impl<'a> DiffGraph<'a> {
         adj_list
             .iter()
             .filter(|(_, v)| v.is_empty())
-            .map(|(k, _)| k.as_str())
+            .map(|(k, _)| *k)
             .collect()
     }
 }
