@@ -4,9 +4,7 @@ use std::collections::{BTreeMap, HashSet};
 
 pub type Mapping<'a> = BTreeMap<&'a str, &'a str>;
 
-// TODO: Is it better to return a list of matches or a hashmap
-// It might be better to do former because we may need to distinguise
-// b/w full and partial match
+/// A Match from a node in the first graph to the second.
 #[derive(Debug, PartialEq)]
 pub struct Matching<'a> {
     pub from: &'a str,
@@ -19,26 +17,38 @@ impl<'a> Matching<'a> {
     }
 }
 
+/// Enum describing the type of a match.
 #[derive(Debug, PartialEq)]
 pub enum Match<'a> {
+    /// Full match means that the match is of high accuracy and is a part
+    /// of the initial set found.
     Full(Matching<'a>),
+
+    /// Partial match means the match of is lower accuracy.
+    /// This match is found by matching the parents of the fully matched nodes.
     Partial(Matching<'a>),
 }
-//
-// impl<'a> Match<'a> {
-//     fn is_full(&self) -> bool {
-//         match self {
-//             Match::Full(_) => true,
-//             _ => false
-//         }
-//     }
-// }
 
-/// Matches both graphs and returns the mapping of nodes from g1 to g2
+/// Matches both graphs and returns the mapping of nodes from g1 to g2.
+///
+/// A 'matching' (or match) is a mapping from a graph 1 node to a graph 2 node.
+///
+/// The list of matches returned by this function is a one to one mapping from graph 1
+/// nodes to graph 2 nodes.
+///
+/// ## Explanation of the algorithm
+///
+/// 1. Find initial list of matches, Mi: n1i -> n2i
+/// 2. If there a parent (say p) of any matched node (say x) in graph 1 is not matched
+///     1. L = Find the parents of the node that is matched with x (parents(Mi(x)))
+///     2. y = Find the node that most closely matches p in L
+///     3. Add y to the matches, Mi(x) = y
+/// 3. Iterate until there are no more matches to be found
+///
+/// The initial matching is called Full matching. The subsequent matches are called partial
+/// matches.
 pub fn match_graphs<'a>(d1: &'a DiffGraph<'_>, d2: &'a DiffGraph<'_>) -> Vec<Match<'a>> {
     let mut mapping: BTreeMap<&str, &str> = get_initial_mapping(d1, d2);
-
-    // TODO: This mapping may have duplicate mappings, remove them
 
     let mut matches: Vec<Match> = mapping
         .iter()

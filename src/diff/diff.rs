@@ -37,9 +37,7 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
         title_bg: Some("yellow".into()),
         ..Default::default()
     };
-    let default_style = NodeStyle {
-        ..Default::default()
-    };
+    let default_style = d1.graph.nodes[0].style.clone();
 
     let mut edges1: Vec<Edge> = d1.graph.edges.clone();
     let mut edges2: Vec<Edge> = d2.graph.edges.clone();

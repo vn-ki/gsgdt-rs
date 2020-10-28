@@ -51,7 +51,90 @@ fn test_diff_vis() {
     let settings: GraphvizSettings = Default::default();
 
     let mut f1 = std::fs::File::create("test1.dot").expect("create failed");
-    let mg = visualize_diff(&d2, &d1);
+    let mg = visualize_diff(&d1, &d2);
+
+    mg.to_dot(&mut f1, &settings).unwrap();
+}
+
+#[test]
+fn test_diff_readme() {
+    let g1_json = r#"
+        {
+          "name": "small",
+          "nodes": [
+            {
+              "label": "bb0", "style": { "title_bg": "lightgrey", "last_stmt_sep": false }, "title": "bb0",
+              "stmts": [
+                "StorageLive(_1)",
+                "_1 = Vec::<i32>::new()"
+              ]
+            },
+            {
+              "label": "bb1", "style": { "title_bg": "lightgrey", "last_stmt_sep": false }, "title": "bb1",
+              "stmts": [
+                "resume"
+              ]
+            }
+          ],
+          "edges": [
+            { "from": "bb0",
+              "to": "bb1",
+              "style":{"color":null},
+              "label": "return"
+            }
+          ]
+        }
+    "#;
+    let g2_json = r#"
+        {
+          "name": "small",
+          "nodes": [
+            {
+              "label": "bb0", "style": { "title_bg": "lightgrey", "last_stmt_sep": false }, "title": "bb0",
+              "stmts": [
+                "StorageLive(_1)",
+                "_1 = Vec::<i32>::new()"
+              ]
+            },
+            {
+              "label": "bb1", "style": { "title_bg": "lightgrey", "last_stmt_sep": false }, "title": "bb0",
+              "stmts": [
+                "StorageLive(_2)",
+                "_2 = Vec::<i32>::new()"
+              ]
+            },
+            {
+              "label": "bb2", "style": { "title_bg": "lightgrey", "last_stmt_sep": false }, "title": "bb1",
+              "stmts": [
+                "resume"
+              ]
+            }
+          ],
+          "edges": [
+            {
+                "from": "bb0",
+                "to": "bb1",
+                "style":{"color":null},
+                "label": "return"
+            },
+            {
+                "from": "bb1",
+                "to": "bb2",
+                "style":{"color":null},
+                "label": "return"
+            }
+          ]
+        }
+    "#;
+    let g1: Graph = serde_json::from_str(g1_json).unwrap();
+    let g2: Graph = serde_json::from_str(g2_json).unwrap();
+
+    let d1 = DiffGraph::new(&g1);
+    let d2 = DiffGraph::new(&g2);
+    let settings: GraphvizSettings = Default::default();
+
+    let mut f1 = std::fs::File::create("test1.dot").expect("create failed");
+    let mg = visualize_diff(&d1, &d2);
 
     mg.to_dot(&mut f1, &settings).unwrap();
 }

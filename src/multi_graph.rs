@@ -14,6 +14,9 @@ impl MultiGraph {
         MultiGraph { name, graphs }
     }
 
+    // TODO: figure a better api to pass graphviz settings.
+    // label should be a part of Graph struct maybe
+    // maybe settings should be part of the struct
     pub fn to_dot<W: Write>(&self, w: &mut W, settings: &GraphvizSettings) -> io::Result<()> {
         let subgraphs = self.graphs.len() > 1;
         if subgraphs {

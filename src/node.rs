@@ -92,8 +92,7 @@ impl Node {
 /// EdgeStyle defines some style of [Edge](struct.Edge.html)
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct EdgeStyle {
-    /// Override the title color of the title
-    /// To color the title of the node differently in graphviz
+    /// Override the color of the edge.
     pub color: Option<String>,
 }
 
