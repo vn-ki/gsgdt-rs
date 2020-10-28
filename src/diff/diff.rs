@@ -1,22 +1,22 @@
 use crate::diff::{match_graphs, DiffGraph, Match};
-use crate::{MultiGraph, Edge, Graph, NodeStyle};
-use std::collections::HashSet;
+use crate::{AdjList, Edge, EdgeStyle, Graph, MultiGraph, NodeStyle};
+use std::collections::{HashMap, HashSet};
 
 /// Returns a MultiGraph containing the diff of the two graphs.
 /// To be visualized with dot.
 pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
     let matches = match_graphs(d1, d2);
 
-    let mut matched1 = HashSet::new();
-    let mut matched2 = HashSet::new();
+    let mut matched1 = HashMap::new();
+    let mut matched2 = HashMap::new();
     let mut partial1 = HashSet::new();
     let mut partial2 = HashSet::new();
 
     for mch in matches {
         match mch {
             Match::Full(m) => {
-                matched1.insert(m.from);
-                matched2.insert(m.to);
+                matched1.insert(m.from, m.to);
+                matched2.insert(m.to, m.from);
             }
             Match::Partial(m) => {
                 partial1.insert(m.from);
@@ -41,37 +41,37 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
         ..Default::default()
     };
 
-    let edges1: Vec<Edge> = d1
-        .graph
-        .edges
-        .iter()
-        .map(|e| {
-            Edge::new(
-                format!("{}_diff1", e.from),
-                format!("{}_diff1", e.to),
-                e.label.clone(),
-            )
-        })
-        .collect();
-    let edges2: Vec<Edge> = d2
-        .graph
-        .edges
-        .iter()
-        .map(|e| {
-            Edge::new(
-                format!("{}_diff2", e.from),
-                format!("{}_diff2", e.to),
-                e.label.clone(),
-            )
-        })
-        .collect();
+    let mut edges1: Vec<Edge> = d1.graph.edges.clone();
+    let mut edges2: Vec<Edge> = d2.graph.edges.clone();
+    let adj_list1 = d1.graph.adj_list();
+    let adj_list2 = d2.graph.adj_list();
+    let removed_edge_style = EdgeStyle {
+        color: Some("red".to_owned()),
+    };
+    let added_edge_style = EdgeStyle {
+        color: Some("green3".to_owned()),
+    };
+    colors_edges(
+        &mut edges1,
+        &matched1,
+        &adj_list2,
+        removed_edge_style,
+        "_diff1",
+    );
+    colors_edges(
+        &mut edges2,
+        &matched2,
+        &adj_list1,
+        added_edge_style,
+        "_diff2",
+    );
 
     let mut nodes1 = Vec::new();
     for node in &d1.graph.nodes {
         let label = node.label.as_str();
         let mut node_cloned = node.clone();
         node_cloned.label = format!("{}_diff1", node.label);
-        if matched1.contains(label) {
+        if matched1.contains_key(label) {
             node_cloned.style = default_style.clone();
             nodes1.push(node_cloned);
         } else if partial1.contains(label) {
@@ -88,7 +88,7 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
         let label = node.label.as_str();
         let mut node_cloned = node.clone();
         node_cloned.label = format!("{}_diff2", node.label);
-        if matched2.contains(label) {
+        if matched2.contains_key(label) {
             node_cloned.style = default_style.clone();
             nodes2.push(node_cloned);
         } else if partial2.contains(label) {
@@ -103,4 +103,37 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
     let newg2 = Graph::new("diff2".to_owned(), nodes2, edges2);
 
     MultiGraph::new("diff".to_owned(), vec![newg1, newg2])
+}
+
+fn colors_edges(
+    edges: &mut Vec<Edge>,
+    matches: &HashMap<&str, &str>,
+    adj_list: &AdjList<'_>,
+    style: EdgeStyle,
+    name_prefix: &str,
+) {
+    for e in edges.iter_mut() {
+        if let Some(matched_lab_from) = matches.get(e.from.as_str()) {
+            if let Some(matched_lab_to) = matches.get(e.to.as_str()) {
+                // both nodes of the edge are matched
+                // TODO: Weird lifetime error
+                let children = &adj_list[matched_lab_from.to_string().as_str()];
+                if children.iter().any(|s| s == matched_lab_to) {
+                    // edge was matched, no need to color
+                    e.from.push_str(name_prefix);
+                    e.to.push_str(name_prefix);
+                    continue;
+                }
+                // there doesn't exist an edge
+                // color this edge
+            }
+            // the node did not get matched
+            // color this edge
+        }
+        e.style = style.clone();
+        // color the edge added
+        // TODO: push
+        e.from.push_str(name_prefix);
+        e.to.push_str(name_prefix);
+    }
 }

@@ -30,6 +30,7 @@
     {
       "from": "bb0",
       "to": "bb1",
+      "style":{"color":null},
       "label": "return"
     }
   ]

@@ -89,6 +89,21 @@ impl Node {
     }
 }
 
+/// EdgeStyle defines some style of [Edge](struct.Edge.html)
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct EdgeStyle {
+    /// Override the title color of the title
+    /// To color the title of the node differently in graphviz
+    pub color: Option<String>,
+}
+
+impl Default for EdgeStyle {
+    fn default() -> EdgeStyle {
+        EdgeStyle {
+            color: None,
+        }
+    }
+}
 /// A directed graph edge
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Edge {
@@ -101,18 +116,24 @@ pub struct Edge {
     /// The label (title) of the edge. This doesn't have to unique.
     // TODO: Rename this to title?
     pub label: String,
+
+    pub style: EdgeStyle
 }
 
 impl Edge {
     pub fn new(from: String, to: String, label: String) -> Edge {
-        Edge { from, to, label }
+        Edge { from, to, label, style: Default::default() }
     }
 
     pub fn to_dot<W: Write>(&self, w: &mut W) -> io::Result<()> {
+        let mut attrs = format!(r#"label="{}""#, self.label);
+        if let Some(color) = &self.style.color {
+            attrs.push_str(&format!(r#" color="{}""#, color));
+        }
         writeln!(
             w,
-            r#"    {} -> {} [label="{}"];"#,
-            self.from, self.to, self.label
+            r#"    {} -> {} [{}];"#,
+            self.from, self.to, attrs
         )
     }
 }

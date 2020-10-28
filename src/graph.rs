@@ -204,7 +204,8 @@ mod tests {
             {\
                 \"from\":\"bb0__0_3\",\
                 \"to\":\"bb0__1_3\",\
-                \"label\":\"return\"\
+                \"label\":\"return\",\
+                \"style\":{\"color\":null}\
             }\
             ]\
         }"
@@ -248,7 +249,8 @@ mod tests {
             {\
                 \"from\":\"bb0__0_3\",\
                 \"to\":\"bb0__1_3\",\
-                \"label\":\"return\"\
+                \"label\":\"return\",\
+                \"style\":{\"color\":null}\
             }\
             ]\
         }"
