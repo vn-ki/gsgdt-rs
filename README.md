@@ -25,7 +25,6 @@ fn main() {
 
         let g = Graph::new(
             "Mir_0_3".into(),
-            GraphKind::Digraph,
             nodes,
             vec![Edge::new(label1, label2, "return".into())],
         );

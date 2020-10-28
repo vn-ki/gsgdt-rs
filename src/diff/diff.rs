@@ -1,16 +1,19 @@
 use crate::diff::{match_graphs, DiffGraph, Match};
 use crate::{AdjList, Edge, EdgeStyle, Graph, MultiGraph, NodeStyle};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 /// Returns a MultiGraph containing the diff of the two graphs.
 /// To be visualized with dot.
 pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
     let matches = match_graphs(d1, d2);
 
+    // TODO: Maybe return the matches as 2 hashmap?
+    // no point in doing the conversion twice
+
     let mut matched1 = HashMap::new();
     let mut matched2 = HashMap::new();
-    let mut partial1 = HashSet::new();
-    let mut partial2 = HashSet::new();
+    let mut partial1 = HashMap::new();
+    let mut partial2 = HashMap::new();
 
     for mch in matches {
         match mch {
@@ -19,8 +22,8 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
                 matched2.insert(m.to, m.from);
             }
             Match::Partial(m) => {
-                partial1.insert(m.from);
-                partial2.insert(m.to);
+                partial1.insert(m.from, m.to);
+                partial2.insert(m.to, m.from);
             }
         }
     }
@@ -52,6 +55,7 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
     colors_edges(
         &mut edges1,
         &matched1,
+        &partial1,
         &adj_list2,
         removed_edge_style,
         "_diff1",
@@ -59,6 +63,7 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
     colors_edges(
         &mut edges2,
         &matched2,
+        &partial2,
         &adj_list1,
         added_edge_style,
         "_diff2",
@@ -72,7 +77,7 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
         if matched1.contains_key(label) {
             node_cloned.style = default_style.clone();
             nodes1.push(node_cloned);
-        } else if partial1.contains(label) {
+        } else if partial1.contains_key(label) {
             node_cloned.style = changed_style.clone();
             nodes1.push(node_cloned);
         } else {
@@ -89,7 +94,7 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
         if matched2.contains_key(label) {
             node_cloned.style = default_style.clone();
             nodes2.push(node_cloned);
-        } else if partial2.contains(label) {
+        } else if partial2.contains_key(label) {
             node_cloned.style = changed_style.clone();
             nodes2.push(node_cloned);
         } else {
@@ -106,13 +111,15 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
 fn colors_edges(
     edges: &mut Vec<Edge>,
     matches: &HashMap<&str, &str>,
+    partial: &HashMap<&str, &str>,
     adj_list: &AdjList<'_>,
     style: EdgeStyle,
     name_prefix: &str,
 ) {
     for e in edges.iter_mut() {
-        if let Some(matched_lab_from) = matches.get(e.from.as_str()) {
-            if let Some(matched_lab_to) = matches.get(e.to.as_str()) {
+        let (from, to) = (e.from.as_str(), e.to.as_str());
+        if let Some(matched_lab_from) = matches.get(from).or(partial.get(from)) {
+            if let Some(matched_lab_to) = matches.get(to).or(partial.get(to)) {
                 // both nodes of the edge are matched
                 // TODO: Weird lifetime error
                 let children = &adj_list[matched_lab_from.to_string().as_str()];

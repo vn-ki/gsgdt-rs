@@ -9,6 +9,8 @@
 //! method. The dot file generated can be rendered to various formats using graphviz.
 //!
 //! ```
+//! use gsgdt::*;
+//!
 //! let label1: String = "bb0__0_3".into();
 //! let label2: String = "bb0__1_3".into();
 //! let style: NodeStyle = Default::default();
@@ -30,7 +32,6 @@
 //!
 //! let g = Graph::new(
 //!     "Mir_0_3".into(),
-//!     GraphKind::Digraph,
 //!     nodes,
 //!     vec![Edge::new(label1, label2, "return".into())],
 //! );
