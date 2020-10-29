@@ -165,6 +165,9 @@ fn select<'a>(
     list_of_labs
         .iter()
         .filter(|lab| {
+            if !use_text_dist_filter {
+                return true;
+            }
             let other_node = d2.graph.get_node_by_label(lab).unwrap();
             // filter out nodes that may differ by more than 2 lines
             (other_node.stmts.len() as i64 - node.stmts.len() as i64).abs() <= 2

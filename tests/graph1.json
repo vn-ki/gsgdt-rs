@@ -10,7 +10,7 @@
       },
       "title": "bb0",
       "stmts": [
-        "StorageLive(_1)",
+        "<td>yo</td><td>hi</td>StorageLive(_1)",
         "_1 = Vec::<i32>::new()"
       ]
     },

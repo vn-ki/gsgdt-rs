@@ -29,11 +29,11 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
     }
 
     let added_style = NodeStyle {
-        title_bg: Some("green".into()),
+        title_bg: Some("green3".into()),
         ..Default::default()
     };
     let removed_style = NodeStyle {
-        title_bg: Some("red".into()),
+        title_bg: Some("red2".into()),
         ..Default::default()
     };
     let changed_style = NodeStyle {
@@ -47,7 +47,7 @@ pub fn visualize_diff(d1: &DiffGraph, d2: &DiffGraph) -> MultiGraph {
     let adj_list1 = d1.graph.adj_list();
     let adj_list2 = d2.graph.adj_list();
     let removed_edge_style = EdgeStyle {
-        color: Some("red".to_owned()),
+        color: Some("red2".to_owned()),
     };
     let added_edge_style = EdgeStyle {
         color: Some("green3".to_owned()),
