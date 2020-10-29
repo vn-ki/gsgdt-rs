@@ -261,7 +261,7 @@ mod tests {
         assert_eq!(expected.edges.len(), got.edges.len());
 
         for (n1, n2) in expected.nodes.iter().zip(got.nodes.iter()) {
-            assert_eq!(n1.stmts, n2.stmts);
+            assert_eq!(n1.content, n2.content);
             assert_eq!(n1.label, n2.label);
             assert_eq!(n1.title, n2.title);
         }

@@ -1,6 +1,6 @@
 use crate::graph::*;
-use std::io::{self, Write};
 use serde::{Deserialize, Serialize};
+use std::io::{self, Write};
 
 /// A collection of graphs.
 #[derive(Deserialize, Serialize)]

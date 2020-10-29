@@ -1,6 +1,6 @@
 use crate::util::escape_html;
-use std::io::{self, Write};
 use serde::{Deserialize, Serialize};
+use std::io::{self, Write};
 
 /// NodeStyle defines some style of [Node](struct.Node.html)
 #[derive(Clone, Serialize, Deserialize)]
@@ -26,7 +26,7 @@ impl Default for NodeStyle {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Node {
     /// A list of statements.
-    pub stmts: Vec<String>,
+    pub content: String,
 
     /// A unique identifier for the given node.
     pub label: String,
@@ -39,7 +39,7 @@ pub struct Node {
 }
 
 impl Node {
-    // TODO: rename to from_str
+    // TODO: rename to from_list
     pub fn new(stmts: Vec<String>, label: String, title: String, style: NodeStyle) -> Node {
         let stmts_len = stmts.len();
         let mut transformed_stmts = Vec::with_capacity(stmts_len);
@@ -53,18 +53,31 @@ impl Node {
             }
 
             if !style.last_stmt_sep {
-                transformed_stmts.push(format!(r#"<tr><td align="left">{}</td></tr>"#, escape_html(&stmts[stmts_len-1])));
+                transformed_stmts.push(format!(
+                    r#"<tr><td align="left">{}</td></tr>"#,
+                    escape_html(&stmts[stmts_len - 1])
+                ));
             } else {
-                transformed_stmts.push(format!(r#"<tr><td align="left" balign="left">{}</td></tr>"#, escape_html(&stmts[stmts_len - 1])));
+                transformed_stmts.push(format!(
+                    r#"<tr><td align="left" balign="left">{}</td></tr>"#,
+                    escape_html(&stmts[stmts_len - 1])
+                ));
             }
         }
-        println!("{:?}", transformed_stmts);
         Node {
-            stmts: transformed_stmts,
+            content: transformed_stmts.join(""),
             label,
             title,
             style,
         }
+    }
+
+    /// Returns an approximate measure of the length of the node content.
+    /// This is an approximate measure used to improve the matching.
+    /// This function simply counts the number of `</br>` and `<tr>` in the content html
+    /// and returns it.
+    pub fn get_content_length(&self) -> usize {
+        self.content.matches("<br/>").count() + self.content.matches("<tr>").count()
     }
 
     pub fn to_dot<W: Write>(&self, w: &mut W) -> io::Result<()> {
@@ -84,11 +97,7 @@ impl Node {
             bg_attr = bg_attr
         )?;
 
-        if !self.stmts.is_empty() {
-            for statement in &self.stmts {
-                write!(w, "{}", statement)?;
-            }
-        }
+        write!(w, "{}", self.content)?;
         // if !self.stmts.is_empty() {
         //     if self.stmts.len() > 1 {
         //         write!(w, r#"<tr><td align="left" balign="left">"#)?;
@@ -121,9 +130,7 @@ pub struct EdgeStyle {
 
 impl Default for EdgeStyle {
     fn default() -> EdgeStyle {
-        EdgeStyle {
-            color: None,
-        }
+        EdgeStyle { color: None }
     }
 }
 /// A directed graph edge
@@ -139,12 +146,17 @@ pub struct Edge {
     // TODO: Rename this to title?
     pub label: String,
 
-    pub style: EdgeStyle
+    pub style: EdgeStyle,
 }
 
 impl Edge {
     pub fn new(from: String, to: String, label: String) -> Edge {
-        Edge { from, to, label, style: Default::default() }
+        Edge {
+            from,
+            to,
+            label,
+            style: Default::default(),
+        }
     }
 
     pub fn to_dot<W: Write>(&self, w: &mut W) -> io::Result<()> {
@@ -152,10 +164,6 @@ impl Edge {
         if let Some(color) = &self.style.color {
             attrs.push_str(&format!(r#" color="{}""#, color));
         }
-        writeln!(
-            w,
-            r#"    {} -> {} [{}];"#,
-            self.from, self.to, attrs
-        )
+        writeln!(w, r#"    {} -> {} [{}];"#, self.from, self.to, attrs)
     }
 }

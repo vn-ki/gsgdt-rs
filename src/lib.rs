@@ -40,8 +40,8 @@
 #![allow(rustc::default_hash_types)]
 mod diff;
 mod graph;
-mod multi_graph;
 mod levenshtein;
+mod multi_graph;
 mod node;
 mod util;
 

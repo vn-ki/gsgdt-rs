@@ -133,17 +133,17 @@ fn dist_bw_nodes(d1: &DiffGraph<'_>, d2: &DiffGraph<'_>, n1: &str, n2: &str) -> 
     let tup1 = (
         d1.dist_start[n1] as i64,
         d1.dist_end[n1] as i64,
-        node1.stmts.len() as i64,
+        node1.get_content_length() as i64,
     );
     let tup2 = (
         d2.dist_start[n2] as i64,
         d2.dist_end[n2] as i64,
-        node2.stmts.len() as i64,
+        node2.get_content_length() as i64,
     );
 
-    let s1 = node1.stmts.join("");
-    let s2 = node2.stmts.join("");
-    let dist = distance(&s1, &s2);
+    let s1 = &node1.content;
+    let s2 = &node2.content;
+    let dist = distance(s1, s2);
 
     Some(
         ((tup1.0 - tup2.0).pow(2) + (tup1.1 - tup2.1).pow(2) + (tup1.2 - tup2.2).pow(2)) as usize
@@ -160,26 +160,28 @@ fn select<'a>(
     use_text_dist_filter: bool,
 ) -> Option<&'a str> {
     let node = d1.graph.get_node_by_label(n).unwrap();
-    let node_stmt_len = node.stmts.len();
-    let node_stmts = node.stmts.join("");
+    let node_content = &node.content;
+    // TODO: Find a better measure
+    // maybe count the </br>s and <tr>s?
+    let content_len = node.get_content_length();
     list_of_labs
         .iter()
+        // .filter(|lab| {
+        //     if !use_text_dist_filter {
+        //         return true;
+        //     }
+        //     let other_node = d2.graph.get_node_by_label(lab).unwrap();
+        //     // filter out nodes that may differ by more than 2 lines
+        //     (other_node.stmts.len() as i64 - node.stmts.len() as i64).abs() <= 2
+        // })
         .filter(|lab| {
             if !use_text_dist_filter {
                 return true;
             }
-            let other_node = d2.graph.get_node_by_label(lab).unwrap();
-            // filter out nodes that may differ by more than 2 lines
-            (other_node.stmts.len() as i64 - node.stmts.len() as i64).abs() <= 2
-        })
-        .filter(|lab| {
-            if !use_text_dist_filter {
-                return true;
-            }
-            let other_node_stmts = d2.graph.get_node_by_label(lab).unwrap().stmts.join("");
-            // allow bigger basic blocks have more edits
+            let other_node_content = &d2.graph.get_node_by_label(lab).unwrap().content;
+            // allow bigger blocks have more edits
             // 2 here is arbitary
-            distance(&node_stmts, &other_node_stmts) < 2 * node_stmt_len
+            distance(&node_content, &other_node_content) < 2 * content_len
         })
         .min_by_key(|x| dist_bw_nodes(d1, d2, n, x))
         .map(|x| *x)

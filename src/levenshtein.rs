@@ -25,10 +25,10 @@ pub(crate) fn distance(s1: &str, s2: &str) -> usize {
         col[0] += 1;
         for j in 1..=l_v1 {
             let last_diag_temp = col[j];
-            if v1[j-1] == v2[i-1] {
+            if v1[j - 1] == v2[i - 1] {
                 col[j] = last_diag;
             } else {
-                col[j] = min(last_diag, min(col[j-1], col[j])) + 1;
+                col[j] = min(last_diag, min(col[j - 1], col[j])) + 1;
             }
             last_diag = last_diag_temp;
         }
@@ -36,7 +36,6 @@ pub(crate) fn distance(s1: &str, s2: &str) -> usize {
 
     col[l_v1]
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -55,7 +54,10 @@ mod tests {
     fn test_equal() {
         assert_eq!(distance("test", "test"), 0);
         assert_eq!(distance("", ""), 0);
-        assert_eq!(distance("long string with space", "long string with space"), 0);
+        assert_eq!(
+            distance("long string with space", "long string with space"),
+            0
+        );
         assert_eq!(distance("unicode 😀", "unicode 😀"), 0);
     }
 
