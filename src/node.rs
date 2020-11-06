@@ -36,6 +36,8 @@ pub struct Node {
 
     /// Can be used to override the default styles
     pub(crate) style: NodeStyle,
+
+    pub(crate) content_length: usize,
 }
 
 impl Node {
@@ -64,11 +66,14 @@ impl Node {
                 ));
             }
         }
+        let content = transformed_stmts.join("");
+        let content_length = Self::length_heuristic(&content);
         Node {
-            content: transformed_stmts.join(""),
+            content,
             label,
             title,
             style,
+            content_length,
         }
     }
 
@@ -76,8 +81,12 @@ impl Node {
     /// This is an approximate measure used to improve the matching.
     /// This function simply counts the number of `</br>` and `<tr>` in the content html
     /// and returns it.
+    fn length_heuristic(content: &str) -> usize {
+        content.matches("<br/>").count() + content.matches("<tr>").count()
+    }
+
     pub fn get_content_length(&self) -> usize {
-        self.content.matches("<br/>").count() + self.content.matches("<tr>").count()
+        self.content_length
     }
 
     pub fn to_dot<W: Write>(&self, w: &mut W) -> io::Result<()> {

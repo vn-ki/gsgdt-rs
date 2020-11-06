@@ -171,7 +171,7 @@ mod tests {
     fn test_json_ser() {
         let g = get_test_graph();
         let json = serde_json::to_string(&g).unwrap();
-        let expected_json: String = r#"{"name":"Mir_0_3","nodes":[{"content":"<tr><td align=\"left\" balign=\"left\">hi<br/></td></tr><tr><td align=\"left\">hell</td></tr>","label":"bb0__0_3","title":"0","style":{"title_bg":null,"last_stmt_sep":false}},{"content":"<tr><td align=\"left\" balign=\"left\">_1 = const 1_i32<br/></td></tr><tr><td align=\"left\">_2 = const 2_i32</td></tr>","label":"bb0__1_3","title":"1","style":{"title_bg":null,"last_stmt_sep":false}}],"edges":[{"from":"bb0__0_3","to":"bb0__1_3","label":"return","style":{"color":null}}]}"#
+        let expected_json: String = r#"{"name":"Mir_0_3","nodes":[{"content":"<tr><td align=\"left\" balign=\"left\">hi<br/></td></tr><tr><td align=\"left\">hell</td></tr>","label":"bb0__0_3","title":"0","style":{"title_bg":null,"last_stmt_sep":false},"content_length":3},{"content":"<tr><td align=\"left\" balign=\"left\">_1 = const 1_i32<br/></td></tr><tr><td align=\"left\">_2 = const 2_i32</td></tr>","label":"bb0__1_3","title":"1","style":{"title_bg":null,"last_stmt_sep":false},"content_length":3}],"edges":[{"from":"bb0__0_3","to":"bb0__1_3","label":"return","style":{"color":null}}]}"#
         .into();
         assert_eq!(json, expected_json)
     }
@@ -179,7 +179,7 @@ mod tests {
     #[test]
     fn test_json_deser() {
         let expected = get_test_graph();
-        let struct_json: String = r#"{"name":"Mir_0_3","nodes":[{"content":"<tr><td align=\"left\" balign=\"left\">hi<br/></td></tr><tr><td align=\"left\">hell</td></tr>","label":"bb0__0_3","title":"0","style":{"title_bg":null,"last_stmt_sep":false}},{"content":"<tr><td align=\"left\" balign=\"left\">_1 = const 1_i32<br/></td></tr><tr><td align=\"left\">_2 = const 2_i32</td></tr>","label":"bb0__1_3","title":"1","style":{"title_bg":null,"last_stmt_sep":false}}],"edges":[{"from":"bb0__0_3","to":"bb0__1_3","label":"return","style":{"color":null}}]}"#
+        let struct_json: String = r#"{"name":"Mir_0_3","nodes":[{"content":"<tr><td align=\"left\" balign=\"left\">hi<br/></td></tr><tr><td align=\"left\">hell</td></tr>","label":"bb0__0_3","title":"0","style":{"title_bg":null,"last_stmt_sep":false},"content_length":3},{"content":"<tr><td align=\"left\" balign=\"left\">_1 = const 1_i32<br/></td></tr><tr><td align=\"left\">_2 = const 2_i32</td></tr>","label":"bb0__1_3","title":"1","style":{"title_bg":null,"last_stmt_sep":false},"content_length":3}],"edges":[{"from":"bb0__0_3","to":"bb0__1_3","label":"return","style":{"color":null}}]}"#
         .into();
         let got: Graph = serde_json::from_str(&struct_json).unwrap();
 
