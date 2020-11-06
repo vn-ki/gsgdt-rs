@@ -166,6 +166,7 @@ fn select<'a>(
     let content_len = node.get_content_length();
     list_of_labs
         .iter()
+        // FIXME: investigate whether this is a useful filter
         // .filter(|lab| {
         //     if !use_text_dist_filter {
         //         return true;

@@ -6,8 +6,8 @@ use gsgdt::*;
 
 #[test]
 fn test_diff_2() {
-    let g1 = read_graph_from_file("tests/graph1.json");
-    let g2 = read_graph_from_file("tests/graph2.json");
+    let g1 = get_graph_1();
+    let g2 = get_graph_2();
 
     let d1 = DiffGraph::new(&g1);
     let d2 = DiffGraph::new(&g2);
