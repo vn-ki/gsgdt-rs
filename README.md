@@ -1,6 +1,6 @@
 # gsgdt
 
-**G**eneric **S**tringly typed **G**raph **D**ata**T**ype
+**G**eneric **S**tringly typed **G**raph **D**ata**T**ype is an opinionated graph visualization and graph diff visualization library.
 
 ```rust
 fn main() {
