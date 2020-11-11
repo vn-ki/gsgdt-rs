@@ -120,6 +120,10 @@ impl Graph {
         }
         if let Some(label) = &settings.graph_label {
             writeln!(w, r#"    label=<{}>;"#, label)?;
+        } else {
+            if as_subgraph {
+                writeln!(w, "    label=\"{}\";", self.name)?;
+            }
         }
 
         for node in self.nodes.iter() {
@@ -143,11 +147,11 @@ mod tests {
         let stmts: Vec<String> = vec!["hi".into(), "hell".into()];
         let label1: String = "bb0__0_3".into();
         let style: NodeStyle = Default::default();
-        let node1 = Node::new(stmts, label1.clone(), "0".into(), style.clone());
+        let node1 = Node::from_list(stmts, label1.clone(), "0".into(), style.clone());
 
         let stmts: Vec<String> = vec!["_1 = const 1_i32".into(), "_2 = const 2_i32".into()];
         let label2: String = "bb0__1_3".into();
-        let node2 = Node::new(stmts, label2.clone(), "1".into(), style.clone());
+        let node2 = Node::from_list(stmts, label2.clone(), "1".into(), style.clone());
 
         Graph::new(
             "Mir_0_3".into(),

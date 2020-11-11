@@ -42,7 +42,7 @@ pub struct Node {
 
 impl Node {
     // TODO: rename to from_list
-    pub fn new(stmts: Vec<String>, label: String, title: String, style: NodeStyle) -> Node {
+    pub fn from_list(stmts: Vec<String>, label: String, title: String, style: NodeStyle) -> Node {
         let stmts_len = stmts.len();
         let mut transformed_stmts = Vec::with_capacity(stmts_len);
         if !stmts.is_empty() {
@@ -107,24 +107,6 @@ impl Node {
         )?;
 
         write!(w, "{}", self.content)?;
-        // if !self.stmts.is_empty() {
-        //     if self.stmts.len() > 1 {
-        //         write!(w, r#"<tr><td align="left" balign="left">"#)?;
-        //         for statement in &self.stmts[..stmts_len - 1] {
-        //             write!(w, "{}<br/>", escape_html(statement))?;
-        //         }
-        //         write!(w, "</td></tr>")?;
-        //     }
-        //
-        //     if !self.style.last_stmt_sep {
-        //         write!(w, r#"<tr><td align="left">"#)?;
-        //         write!(w, "{}", escape_html(&self.stmts[stmts_len - 1]))?;
-        //     } else {
-        //         write!(w, r#"<tr><td align="left" balign="left">"#)?;
-        //         write!(w, "{}", escape_html(&self.stmts[stmts_len - 1]))?;
-        //     }
-        //     write!(w, "</td></tr>")?;
-        // }
 
         write!(w, "</table>")
     }

@@ -9,13 +9,13 @@ fn main() {
         let style: NodeStyle = Default::default();
 
         let nodes = vec![
-            Node::new(
+            Node::from_list(
                 vec!["_1 = const 1_i32".into(), "_2 = const 2_i32".into()],
                 label1.clone(),
                 "0".into(),
                 style.clone(),
             ),
-            Node::new(
+            Node::from_list(
                 vec!["return".into()],
                 label2.clone(),
                 "1".into(),
@@ -48,13 +48,13 @@ fn test_diff_readme() {
     let g1 = Graph::new(
         "small".into(),
         vec![
-            Node::new(
+            Node::from_list(
                 vec!["_1 = const 1_i32".into(), "_2 = const 2_i32".into()],
                 "bb0".into(),
                 "bb0".into(),
                 style.clone(),
             ),
-            Node::new(
+            Node::from_list(
                 vec!["return".into()],
                 "bb1".into(),
                 "bb1".into(),
